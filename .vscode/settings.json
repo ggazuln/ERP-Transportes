@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./models"
+    ],
+    "python.pythonPath": "venv/bin/python3.10"
+}

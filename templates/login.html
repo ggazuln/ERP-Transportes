@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar sesión - Transportes Artisa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+</head>
+
+<body>
+    <a href="{{ url_for('auth.reset_request') }}" class="forgot-password-corner" title="Recuperar contraseña">
+        <i class="fas fa-key"></i>
+        <span>Recuperar Clave</span>
+    </a>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Transportes Artisa">
+        </div>
+
+        <div class="login-box">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {% if category == 'danger' %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <label for="{{ form.username.id }}" class="sr-only">Usuario</label>
+                    {{ form.username(class_='form-control', placeholder='Usuario') }}
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <label for="{{ form.password.id }}" class="sr-only">Contraseña</label>
+                    {{ form.password(class_='form-control', placeholder='Contraseña', id='password', autocomplete="new-password") }}
+                </div>
+                <button type="submit">{{ form.submit.label.text }}</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

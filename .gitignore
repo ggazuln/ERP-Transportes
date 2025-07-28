@@ -1,0 +1,19 @@
+# Entornos virtuales
+venv/
+.env
+
+# Archivos de Python generados
+__pycache__/
+*.pyc
+
+# Archivos de logs y bases de datos locales
+*.log
+*.sqlite3
+
+# Config y caché
+*.egg-info/
+*.bak
+
+# Archivos de sistema
+.DS_Store
+*.swp

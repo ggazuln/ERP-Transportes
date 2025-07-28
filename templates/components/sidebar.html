@@ -1,0 +1,54 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- Logo y nombre del usuario -->
+  <a href="{{ url_for('dashboard.show_dashboard') }}" class="brand-link">
+    {% if empresa_logo %}
+    <img src="{{ url_for('static', filename='img/' ~ empresa_logo ~ '.png') }}" alt="Logo Empresa"
+      class="brand-image img-circle elevation-3" style="opacity: .8;">
+    {% endif %}
+    <span class="brand-text font-weight-light">
+      <strong>{{ current_user.username }}</strong>
+    </span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+        <!-- Menú inicio -->
+        <li class="nav-item">
+          <a href="{{ url_for('dashboard.show_dashboard') }}" class="nav-link">
+            <i class="nav-icon fas fa-home"></i>
+            <p>Inicio</p>
+          </a>
+        </li>
+
+        <!-- Menú dinámico -->
+        {% for modulo, submodulos in menu_lateral.items() %}
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-folder"></i>
+            <p>
+              {{ modulo|capitalize }}
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            {% for sub in submodulos %}
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="{{ sub.icono }} nav-icon"></i>
+                <p>
+                {{ sub.nombre | replace('_', ' ') | capitalize }}
+                 </p>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% endfor %}
+
+      </ul>
+    </nav>
+  </div>
+</aside>

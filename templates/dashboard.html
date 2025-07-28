@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <h1>Bienvenido, {{ current_user.nombre }}</h1>
+    <p>Aquí puedes ver un resumen de tu actividad.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body bg-light">
+                <h3>Indicadores clave</h3>
+                <p>Aquí irían los indicadores.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

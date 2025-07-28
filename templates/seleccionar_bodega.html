@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Seleccionar Bodega</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/seleccionar_bodega.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}"> <!-- FontAwesome -->
+</head>
+
+<body>
+    <div class="contenedor-panel">
+
+        <h3>📦 <strong>Bodega Administrativa</strong></h3>
+        <div class="bodega-grid">
+            {% for b in bodega_principal %}
+            <form action="{{ url_for('auth.seleccionar_bodega') }}" method="POST">
+                <input type="hidden" name="bodega_id" value="{{ b.id }}">
+                <button type="submit" class="boton-bodega">
+                    <i class="fas fa-warehouse icono-bodega"></i>
+                    {{ b.nombre }}
+                    <div class="texto-ingresar">
+                        <i class="fas fa-sign-in-alt"></i> Ingresar
+                    </div>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+
+        {% for empresa, bodegas in bodegas_por_empresa.items() %}
+        <div class="bloque-empresa">
+            <h3>
+                {% if empresa.logo %}
+              <img class="logo-empresa" src="{{ url_for('static', filename='img/' ~ empresa.logo ~ '.png') }}"
+                     alt="{{ empresa.logo }}">
+                {% endif %}
+                {{ empresa.nombre }}
+            </h3>
+          
+            <div class="bodega-grid">
+                {% for bodega in bodegas %}
+                <form action="{{ url_for('auth.seleccionar_bodega') }}" method="POST">
+                    <input type="hidden" name="bodega_id" value="{{ bodega.id }}">
+                    <button type="submit" class="boton-bodega">
+                        <i class="fas fa-box-open icono-bodega"></i>
+                        {{ bodega.nombre }}
+                        <div class="texto-ingresar">
+                            <i class="fas fa-sign-in-alt"></i> Ingresar
+                        </div>
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <h3>🌐 <strong>Bodegas Virtuales</strong></h3>
+        <div class="bodega-grid">
+            {% for b in bodegas_virtuales %}
+            <form action="{{ url_for('auth.seleccionar_bodega') }}" method="POST">
+                <input type="hidden" name="bodega_id" value="{{ b.id }}">
+                <button type="submit" class="boton-bodega">
+                    <i class="fas fa-cloud icono-bodega"></i>
+                    {{ b.nombre }}
+                    <div class="texto-ingresar">
+                        <i class="fas fa-sign-in-alt"></i> Ingresar
+                    </div>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+
+    </div>
+</body>
+
+</html>
