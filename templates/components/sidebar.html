@@ -17,36 +17,46 @@
 
         <!-- Menú inicio -->
         <li class="nav-item">
-          <a href="{{ url_for('dashboard.show_dashboard') }}" class="nav-link">
+          <a href="{{ url_for('dashboard.show_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'dashboard.show_dashboard' else '' }}">
             <i class="nav-icon fas fa-home"></i>
             <p>Inicio</p>
           </a>
         </li>
 
-        <!-- Menú dinámico -->
-        {% for modulo, submodulos in menu_lateral.items() %}
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-folder"></i>
-            <p>
-              {{ modulo|capitalize }}
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-          <ul class="nav nav-treeview">
-            {% for sub in submodulos %}
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="{{ sub.icono }} nav-icon"></i>
-                <p>
-                {{ sub.nombre | replace('_', ' ') | capitalize }}
-                 </p>
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </li>
-        {% endfor %}
+        {# --- MACRO RECURSIVO PARA RENDERIZAR EL MENÚ --- #}
+        {% macro render_menu(items) %}
+          {% for item in items %} {# Cada 'item' es un módulo #}
+            {% if item.hijos %}
+              {# Es un Módulo con submódulos, se renderiza como un submenú desplegable #}
+              {% set blueprint_name = item.endpoint.split('.')[0] %}
+              {% set is_open = request.endpoint.startswith(blueprint_name) %}
+              <li class="nav-item {{ 'menu-open' if is_open else '' }}">
+                <a href="#" class="nav-link {{ 'active' if is_open else '' }}">
+                  <i class="nav-icon {{ item.icono or 'fas fa-folder' }}"></i>
+                  <p>
+                    {{ item.nombre }}
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  {# Llamada recursiva para los submódulos #}
+                  {{ render_menu(item.hijos) }}
+                </ul>
+              </li>
+            {% else %}
+              {# Es un Módulo sin submódulos (hoja del árbol), se renderiza como un enlace simple #}
+              <li class="nav-item">
+                <a href="{{ safe_url_for(item.endpoint) }}" class="nav-link {{ 'active' if request.endpoint == item.endpoint else '' }}">
+                  <i class="nav-icon {{ item.icono or 'far fa-circle' }}"></i>
+                  <p>{{ item.nombre }}</p>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endmacro %}
+
+        <!-- Menú dinámico generado por el macro -->
+        {{ render_menu(menu_lateral) }}
 
       </ul>
     </nav>
