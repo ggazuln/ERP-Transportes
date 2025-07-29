@@ -1,11 +1,13 @@
 import os
 import secrets
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_paginate import Pagination, get_page_parameter
 from flask_login import login_required
 from extensions import db
 from forms.persona_form import PersonaForm
 from models.usuario import Persona
+from models.cargo import Cargo
+from models.bodega import Bodega
 from models.acceso import PersonaRol
 from werkzeug.utils import secure_filename
 
@@ -24,19 +26,91 @@ def guardar_firma(firma_file):
 @personal.route('/')
 @login_required
 def index():
-    """Muestra la lista de todo el personal."""
+    """Muestra la lista de todo el personal con filtros y paginación."""
     page = request.args.get(get_page_parameter(), type=int, default=1)
     per_page = current_app.config.get('PER_PAGE', 10)
-    offset = (page - 1) * per_page
 
-    personal_query = Persona.query.order_by(Persona.nombre)
-    total = personal_query.count()
+    # --- COMENTARIO: Obtenemos los parámetros de búsqueda del formulario en la URL ---
+    search_nombre = request.args.get('search_nombre', '').strip()
+    search_rut = request.args.get('search_rut', '').strip()
+    cargo_id = request.args.get('cargo', type=int)
+    bodega_id = request.args.get('bodega', type=int)
+
+    # --- COMENTARIO: Construimos la consulta base, sin ejecutarla todavía ---
+    personal_query = Persona.query
+
+    # --- COMENTARIO: Aplicamos los filtros a la consulta dinámicamente ---
+    if search_nombre:
+        from sqlalchemy import or_, and_
+        # COMENTARIO: Se divide el término de búsqueda en palabras individuales.
+        search_words = search_nombre.split()
+        # COMENTARIO: Se crea una lista de condiciones. Cada palabra debe estar presente
+        # ya sea en el nombre o en el apellido.
+        conditions = []
+        for word in search_words:
+            conditions.append(or_(
+                Persona.nombre.ilike(f'%{word}%'),
+                Persona.apellido.ilike(f'%{word}%')
+            ))
+        personal_query = personal_query.filter(and_(*conditions))
+    if search_rut:
+        personal_query = personal_query.filter(Persona.rut.ilike(f'%{search_rut}%'))
+    if cargo_id:
+        personal_query = personal_query.filter(Persona.cargo_id == cargo_id)
+    if bodega_id:
+        personal_query = personal_query.filter(Persona.bodega_id == bodega_id)
+
+    # --- COMENTARIO: Ordenamos y paginamos la consulta ya filtrada ---
+    personal_query = personal_query.order_by(Persona.nombre)
+    total = personal_query.count()  # Contamos el total de resultados después de filtrar
+    offset = (page - 1) * per_page
     personal_list = personal_query.offset(offset).limit(per_page).all()
 
-    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap5')
+    # --- COMENTARIO: Configuramos la paginación para que mantenga los filtros al cambiar de página ---
+    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap5', search=True, record_name='personal')
 
-    return render_template('administracion/personal/index.html', personal_list=personal_list,
-                           pagination=pagination, title="Administración de Personal")
+    # --- COMENTARIO: Cargamos los datos para los menús desplegables de los filtros ---
+    cargos = Cargo.query.order_by(Cargo.nombre).all()
+    bodegas = Bodega.query.order_by(Bodega.nombre).all()
+
+    # --- COMENTARIO: Pasamos todos los datos necesarios a la plantilla ---
+    return render_template('administracion/personal/index.html',
+                           personal_list=personal_list,
+                           pagination=pagination,
+                           title="Administración de Personal",
+                           cargos=cargos,
+                           bodegas=bodegas)
+
+@personal.route('/autocomplete')
+@login_required
+def autocomplete():
+    """Endpoint para proporcionar datos de autocompletado a la UI."""
+    search = request.args.get('term', '').strip()
+    field = request.args.get('field', 'nombre')  # Campo por defecto: 'nombre'
+
+    if not search or len(search) < 2:
+        return jsonify([])
+
+    query = Persona.query
+    results = []
+
+    if field == 'nombre':
+        # Busca en nombre y apellido, y devuelve el nombre completo
+        query = query.filter(
+            db.or_(
+                Persona.nombre.ilike(f'%{search}%'),
+                Persona.apellido.ilike(f'%{search}%')
+            )
+        ).limit(10)
+        results = [f"{p.nombre} {p.apellido}" for p in query.all()]
+    elif field == 'rut':
+        query = query.filter(Persona.rut.ilike(f'%{search}%')).limit(10)
+        results = [p.rut for p in query.all()]
+
+    # Eliminar duplicados y ordenar
+    unique_results = sorted(list(set(results)))
+
+    return jsonify(unique_results)
 
 @personal.route('/crear', methods=['GET', 'POST'])
 @login_required
@@ -53,6 +127,9 @@ def crear():
             celular_contacto=form.celular_contacto.data,
             persona_contacto=form.persona_contacto.data,
             cargo_id=form.cargo_id.data.id if form.cargo_id.data else None,
+            # COMENTARIO: Se añade la asignación de la faena/bodega.
+            # Asegúrate de que tu PersonaForm tenga un campo 'bodega_id'.
+            bodega_id=form.bodega_id.data.id if form.bodega_id.data else None,
             fecha_vencimiento_licencia=form.fecha_vencimiento_licencia.data,
             fecha_vencimiento_cedula=form.fecha_vencimiento_cedula.data,
             tiene_login=form.tiene_login.data,
@@ -109,6 +186,9 @@ def editar(persona_id):
         persona.activo = form.activo.data
         persona.tiene_login = form.tiene_login.data
         persona.cargo_id = form.cargo_id.data.id if form.cargo_id.data else None
+        # COMENTARIO: Se añade la actualización de la faena/bodega.
+        # Asegúrate de que tu PersonaForm tenga un campo 'bodega_id'.
+        persona.bodega_id = form.bodega_id.data.id if form.bodega_id.data else None
 
         if form.firma_imagen.data:
             persona.firma_imagen = guardar_firma(form.firma_imagen.data)

@@ -4,10 +4,14 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateF
 from wtforms.validators import DataRequired, Length, Email, Optional, EqualTo
 from wtforms_sqlalchemy.fields import QuerySelectField
 from models.cargo import Cargo
+from models.bodega import Bodega
 from models.acceso import Rol  # Asumimos que tienes Rol aquí
 
 def get_cargos():
     return Cargo.query.order_by(Cargo.nombre).all()
+
+def get_bodegas():
+    return Bodega.query.order_by(Bodega.nombre).all()
 
 def get_roles():
     return Rol.query.order_by(Rol.nombre).all()
@@ -25,6 +29,7 @@ class PersonaForm(FlaskForm):
 
     # Datos Laborales y Documentación
     cargo_id = QuerySelectField('Cargo', query_factory=get_cargos, get_label='nombre', allow_blank=True, blank_text='-- Seleccionar Cargo --', validators=[Optional()])
+    bodega_id = QuerySelectField('Faena Principal', query_factory=get_bodegas, get_label='nombre', allow_blank=True, blank_text='-- Seleccionar Faena --', validators=[Optional()])
     fecha_vencimiento_licencia = DateField('Fecha de Vencimiento de Licencia', format='%Y-%m-%d', validators=[Optional()])
     fecha_vencimiento_cedula = DateField('Fecha de Vencimiento de Cédula', format='%Y-%m-%d', validators=[Optional()])
     firma_imagen = FileField('Imagen de Firma', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Solo imágenes permitidas (JPG, PNG)')])

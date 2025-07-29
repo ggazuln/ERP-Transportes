@@ -2,40 +2,87 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-  <div class="card shadow-sm rounded-4">
-    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white rounded-top-4">
-      <h5 class="mb-0">Mantenedor de Personal</h5>
-      <a href="{{ url_for('personal.crear') }}" class="btn btn-light btn-sm">
-        <i class="fas fa-plus"></i> Nuevo
-      </a>
+  <!-- COMENTARIO: Se cambia el color a 'secondary' para un look más profesional y menos chillón. -->
+  <div class="card card-outline card-secondary shadow-sm mb-4">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-search me-2"></i>
+        Filtros de Búsqueda
+      </h3>
+      <div class="card-tools">
+        <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
     </div>
-
-    <div class="card-body border-top">
-      <form method="get" class="row g-2 mb-3">
-        <div class="col-md-3">
-          <input type="text" name="search_nombre" class="form-control" placeholder="Nombre" value="{{ request.args.get('search_nombre', '') }}">
+    <div class="card-body">
+      <form method="get" action="{{ url_for('personal.index') }}">
+        <div class="row">
+          <div class="col-md-6 col-lg-3">
+            <div class="form-group">
+              <label for="search_nombre">Nombre o Apellido</label>
+              <input type="text" id="search_nombre" name="search_nombre" class="form-control" placeholder="Buscar por nombre..." value="{{ request.args.get('search_nombre', '') }}">
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="form-group">
+              <label for="search_rut">RUT</label>
+              <input type="text" id="search_rut" name="search_rut" class="form-control" placeholder="Buscar por RUT..." value="{{ request.args.get('search_rut', '') }}">
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="form-group">
+              <label for="cargo">Cargo</label>
+              <!-- COMENTARIO: Añadimos la clase 'select2-enable' para activar la búsqueda inteligente. -->
+              <select id="cargo" name="cargo" class="form-select select2-enable">
+                <option value="">-- Todos los Cargos --</option>
+                {% for cargo in cargos %}
+                  <option value="{{ cargo.id }}" {% if request.args.get('cargo')|int == cargo.id %}selected{% endif %}>
+                    {{ cargo.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="form-group">
+              <label for="bodega">Faena Principal</label>
+              <!-- COMENTARIO: Añadimos la clase 'select2-enable' para activar la búsqueda inteligente. -->
+              <select id="bodega" name="bodega" class="form-select select2-enable">
+                <option value="">-- Todas las Faenas --</option>
+                {% for bodega in bodegas %}
+                  <option value="{{ bodega.id }}" {% if request.args.get('bodega')|int == bodega.id %}selected{% endif %}>
+                    {{ bodega.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="col-md-3">
-          <input type="text" name="search_rut" class="form-control" placeholder="RUT" value="{{ request.args.get('search_rut', '') }}">
-        </div>
-        <div class="col-md-2">
-          <select name="cargo" class="form-select">
-            <option value="">Todos los Cargos</option>
-            <!-- Opciones dinámicas -->
-          </select>
-        </div>
-        <div class="col-md-2">
-          <select name="bodega" class="form-select">
-            <option value="">Todas las Bodegas</option>
-            <!-- Opciones dinámicas -->
-          </select>
-        </div>
-        <div class="col-md-2 text-end">
-          <button type="submit" class="btn btn-primary me-1"><i class="fas fa-search"></i> Buscar</button>
-          <a href="{{ url_for('personal.index') }}" class="btn btn-secondary">Limpiar</a>
+        <div class="row mt-3">
+          <div class="col-12 text-end">
+            <a href="{{ url_for('personal.index') }}" class="btn btn-secondary">
+              <i class="fas fa-eraser me-1"></i> Limpiar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-search me-1"></i> Buscar
+            </button>
+          </div>
         </div>
       </form>
+    </div>
+  </div>
 
+  <div class="card shadow-sm rounded-4">
+    <!-- COMENTARIO: Se cambia el color del encabezado a 'bg-dark' para un estilo más sobrio y profesional. -->
+    <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white rounded-top-4">
+      <h5 class="mb-0">Listado de Personal</h5>
+      <!-- COMENTARIO: Se cambia a 'btn-outline-light' para una mejor visibilidad y un look más profesional. -->
+      <a href="{{ url_for('personal.crear') }}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-plus me-1"></i> Nuevo Personal
+      </a>
+    </div>
+    <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
           <thead class="table-light text-center">
@@ -43,7 +90,7 @@
               <th>RUT</th>
               <th>Nombre</th>
               <th>Cargo</th>
-              <th>Bodega</th>
+              <th>Faena</th>
               <th>Licencia</th>
               <th>C.I.</th>
               <th>Dirección</th>
@@ -85,11 +132,56 @@
           </tbody>
         </table>
       </div>
-
+    </div>
+    <!-- COMENTARIO: El pie de la tarjeta ahora solo contiene la paginación para un diseño más limpio. -->
+    {% if pagination and pagination.total > pagination.per_page %}
+    <div class="card-footer clearfix">
       <div class="d-flex justify-content-center">
         {{ pagination.links }}
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // COMENTARIO: Se itera sobre cada elemento para inicializar Select2 correctamente.
+    // Dentro de .each(), 'this' se refiere al <select> individual, lo que permite
+    // configurar 'dropdownParent' de forma correcta para cada uno.
+    $('.select2-enable').each(function() {
+      $(this).select2({
+        theme: 'bootstrap-5',
+        // El placeholder se toma de la primera opción del select.
+        // dropdownParent asegura que el menú desplegable se muestre correctamente
+        // sin ser cortado por los bordes de la tarjeta (card).
+        dropdownParent: $(this).parent()
+      });
+    });
+
+    // COMENTARIO: Inicializa el autocompletado para el campo de nombre.
+    $("#search_nombre").autocomplete({
+      source: function(request, response) {
+        // Llama al endpoint de autocomplete pasando el término y el campo a buscar.
+        $.getJSON("{{ url_for('personal.autocomplete') }}", {
+          term: request.term,
+          field: 'nombre'
+        }, response);
+      },
+      minLength: 2, // Empezar a buscar después de 2 caracteres.
+      delay: 300      // Esperar 300ms después de teclear para no sobrecargar el servidor.
+    });
+
+    // COMENTARIO: Inicializa el autocompletado para el campo de RUT.
+    $("#search_rut").autocomplete({
+      source: function(request, response) {
+        $.getJSON("{{ url_for('personal.autocomplete') }}", { term: request.term, field: 'rut' }, response);
+      },
+      minLength: 2,
+      delay: 300
+    });
+  });
+</script>
 {% endblock %}
