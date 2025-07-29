@@ -1,19 +1,51 @@
+# -----------------------------
 # Entornos virtuales
+.venv/
 venv/
+env/
+
+# -----------------------------
+# Archivos de entorno sensibles
 .env
+.env.*
 
-# Archivos de Python generados
+# -----------------------------
+# Archivos compilados de Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
 
-# Archivos de logs y bases de datos locales
+# -----------------------------
+# Archivos de logs y dumps
 *.log
+*.bak
+*.dump
+
+# -----------------------------
+# Archivos de bases de datos locales
 *.sqlite3
 
-# Config y caché
-*.egg-info/
-*.bak
+# -----------------------------
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# Archivos de sistema
+# -----------------------------
+# Archivos del sistema
 .DS_Store
+Thumbs.db
 *.swp
+
+# -----------------------------
+# Docker
+*.pid
+*.pid.lock
+docker-compose.override.yml
