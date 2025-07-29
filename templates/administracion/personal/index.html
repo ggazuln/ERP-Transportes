@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm rounded-4">
+    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white rounded-top-4">
+      <h5 class="mb-0">Mantenedor de Personal</h5>
+      <a href="{{ url_for('personal.crear') }}" class="btn btn-light btn-sm">
+        <i class="fas fa-plus"></i> Nuevo
+      </a>
+    </div>
+
+    <div class="card-body border-top">
+      <form method="get" class="row g-2 mb-3">
+        <div class="col-md-3">
+          <input type="text" name="search_nombre" class="form-control" placeholder="Nombre" value="{{ request.args.get('search_nombre', '') }}">
+        </div>
+        <div class="col-md-3">
+          <input type="text" name="search_rut" class="form-control" placeholder="RUT" value="{{ request.args.get('search_rut', '') }}">
+        </div>
+        <div class="col-md-2">
+          <select name="cargo" class="form-select">
+            <option value="">Todos los Cargos</option>
+            <!-- Opciones dinámicas -->
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="bodega" class="form-select">
+            <option value="">Todas las Bodegas</option>
+            <!-- Opciones dinámicas -->
+          </select>
+        </div>
+        <div class="col-md-2 text-end">
+          <button type="submit" class="btn btn-primary me-1"><i class="fas fa-search"></i> Buscar</button>
+          <a href="{{ url_for('personal.index') }}" class="btn btn-secondary">Limpiar</a>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light text-center">
+            <tr>
+              <th>RUT</th>
+              <th>Nombre</th>
+              <th>Cargo</th>
+              <th>Bodega</th>
+              <th>Licencia</th>
+              <th>C.I.</th>
+              <th>Dirección</th>
+              <th>Celular</th>
+              <th>Contacto</th>
+              <th>Cel. Contacto</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in personal_list %}
+            <tr>
+              <td>{{ p.rut }}</td>
+              <td>{{ p.nombre }} {{ p.apellido }}</td>
+              <td>{{ p.cargo.nombre if p.cargo else '' }}</td>
+              <td>{{ p.bodega.nombre if p.bodega else '' }}</td>
+              <td>{{ p.fecha_vencimiento_licencia or '' }}</td>
+              <td>{{ p.fecha_vencimiento_cedula or '' }}</td>
+              <td>{{ p.direccion or '' }}</td>
+              <td>{{ p.celular_personal or '' }}</td>
+              <td>{{ p.persona_contacto or '' }}</td>
+              <td>{{ p.celular_contacto or '' }}</td>
+              <td class="text-center">
+                <a href="{{ url_for('personal.editar', persona_id=p.id) }}" class="btn btn-sm btn-warning">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <!-- Opcional: botón eliminar 
+                <a href="#" class="btn btn-sm btn-danger">
+                  <i class="fas fa-trash-alt"></i>
+                </a>
+                -->
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="11" class="text-center text-muted">No se encontraron registros.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-center">
+        {{ pagination.links }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

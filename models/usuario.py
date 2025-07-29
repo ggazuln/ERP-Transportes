@@ -16,13 +16,27 @@ class Persona(UserMixin, db.Model):
     rut = db.Column(db.String(20), unique=True, nullable=False)
     direccion = db.Column(db.String(200))
     email = db.Column(db.String(150), unique=True)
-    cargo = db.Column(db.String(50))
-    bodega_id = db.Column(db.Integer, db.ForeignKey('bodega.id'))
+
+    # Relaciones clave foránea
+    cargo_id = db.Column(db.Integer, db.ForeignKey('cargo.id'), nullable=True)
+    bodega_id = db.Column(db.Integer, db.ForeignKey('bodega.id'), nullable=True)
+
+    # Campos de acceso
     username = db.Column(db.String(150), unique=True)
-    password = db.Column(db.String(150))
+    password_hash = db.Column(db.String(150))
     tiene_login = db.Column(db.Boolean, default=False)
     activo = db.Column(db.Boolean, default=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Datos personales y de contacto
+    celular_personal = db.Column(db.String(20))
+    celular_contacto = db.Column(db.String(20))
+    persona_contacto = db.Column(db.String(150))
+
+    # Documentación
+    fecha_vencimiento_licencia = db.Column(db.Date)
+    fecha_vencimiento_cedula = db.Column(db.Date)
+    firma_imagen = db.Column(db.String(255))  # Ruta del archivo de firma
 
     # Relaciones
     roles = db.relationship('PersonaRol', back_populates='persona', cascade='all, delete-orphan')
