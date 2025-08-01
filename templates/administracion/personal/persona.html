@@ -1,5 +1,11 @@
 {% extends 'layout.html' %}
-{% from 'components/form_macros.html' import render_field, render_select_field, render_checkbox, render_submit %}
+{% from 'components/form_macros.html' import
+    render_field,
+    render_select_field,
+    render_queryselect_field,
+    render_checkbox,
+    render_submit
+%}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -24,7 +30,6 @@
 
 {% block content %}
 <div class="card shadow-sm rounded-4">
-  <!-- COMENTARIO: Se aplica el estilo del encabezado de index.html para consistencia. -->
   <div class="card-header bg-dark text-white rounded-top-4">
     <h3 class="card-title mb-0">{{ legend }}</h3>
   </div>
@@ -60,10 +65,8 @@
 
       <h5 class="text-muted mt-4 mb-3"><i class="fas fa-briefcase me-2"></i>Información Laboral y Documentos</h5>
       <div class="row">
-        <!-- COMENTARIO: Se añade la clase 'select2-enable' para que el campo sea un buscador. -->
-        <div class="col-md-6">{{ render_select_field(form.cargo_id, class='form-select select2-enable') }}</div>
-        <!-- COMENTARIO: Se añade el campo para seleccionar la faena, también con búsqueda. -->
-        <div class="col-md-6">{{ render_select_field(form.bodega_id, class='form-select select2-enable') }}</div>
+        <div class="col-md-6">{{ render_queryselect_field(form.cargo_id, class_='select2-enable') }}</div>
+        <div class="col-md-6">{{ render_queryselect_field(form.bodega_id, class_='select2-enable') }}</div>
       </div>
       <div class="row">
         <div class="col-md-6">{{ render_field(form.firma_imagen, type="file") }}</div>
@@ -96,7 +99,7 @@
     </div>
 
     <div class="card-footer d-flex justify-content-between">
-      {{ form.submit(class="btn btn-primary") }}
+      {{ render_submit(form.submit) }}
       <a href="{{ url_for('personal.index') }}" class="btn btn-secondary">Cancelar</a>
     </div>
   </form>
@@ -105,23 +108,24 @@
 
 {% block extra_js %}
 <script>
-  $(document).ready(function() {
-    // --- Lógica para mostrar/ocultar campos de login ---
-    const tieneLoginCheckbox = document.getElementById('tiene_login');
-    const loginFieldsDiv = document.getElementById('login-fields');
-  
-    function toggleLoginFields() {
-      loginFieldsDiv.style.display = tieneLoginCheckbox.checked ? 'block' : 'none';
-    }
-  
-    tieneLoginCheckbox.addEventListener('change', toggleLoginFields);
+  $(document).ready(function () {
+    const $tieneLoginCheckbox = $('#tiene_login');
+    const $loginFields = $('#login-fields');
 
-    // --- Inicialización de Select2 para los campos de Cargo y Faena ---
-    $('.select2-enable').each(function() {
+    function toggleLoginFields() {
+      // Use jQuery's toggle with a boolean for cleaner show/hide logic
+      $loginFields.toggle($tieneLoginCheckbox.is(':checked'));
+    }
+
+    // Run on page load to set initial state
+    toggleLoginFields();
+
+    // Attach event handler
+    $tieneLoginCheckbox.on('change', toggleLoginFields);
+
+    $('.select2-enable').each(function () {
       $(this).select2({
         theme: 'bootstrap-5',
-        // dropdownParent asegura que el menú desplegable se muestre correctamente
-        // sin ser cortado por los bordes de la tarjeta (card).
         dropdownParent: $(this).parent()
       });
     });

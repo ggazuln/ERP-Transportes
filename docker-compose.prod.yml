@@ -1,0 +1,24 @@
+services:
+  web:
+    build: .
+    command: flask run --host=0.0.0.0 --port=5000
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"  # <-- cámbialo así para conectar desde pgAdmin o tu host si es necesario
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:

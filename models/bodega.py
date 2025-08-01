@@ -16,3 +16,6 @@ class Bodega(db.Model):
 
     empresa_id = db.Column(db.Integer, db.ForeignKey('empresa.id'))
     empresa = db.relationship('Empresa')
+    
+    def __str__(self):
+        return self.nombre

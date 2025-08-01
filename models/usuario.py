@@ -44,10 +44,12 @@ class Persona(UserMixin, db.Model):
 
     # Métodos de autenticación
     def set_password(self, raw_password):
-        self.password = generate_password_hash(raw_password)
+        self.password_hash = generate_password_hash(raw_password)
 
     def check_password(self, raw_password):
-        return check_password_hash(self.password, raw_password)
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, raw_password)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'])

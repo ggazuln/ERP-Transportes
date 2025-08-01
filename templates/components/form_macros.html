@@ -1,39 +1,109 @@
-{# Macro para renderizar campos de texto, fecha, etc. #}
-{% macro render_field(field, class='form-control', type='text', placeholder='') %}
-  <div class="form-group mb-3">
-    {{ field.label(class="form-label") }}
-    {# Añade la clase 'is-invalid' si el campo tiene errores de validación #}
-    {{ field(class=class + (' is-invalid' if field.errors else ''), type=type, placeholder=placeholder) }}
-    {% if field.errors %}
-      <div class="invalid-feedback d-block">
-        {{ field.errors[0] }}
-      </div>
+{% macro render_field(field, type=None, placeholder=None) %}
+<div class="form-group mb-3">
+    {% if field.type != 'HiddenField' %}
+        {{ field.label(class="form-label") }}
     {% endif %}
-  </div>
-{% endmacro %}
 
-{# Macro para renderizar campos de selección (dropdowns) #}
-{% macro render_select_field(field, class='form-select') %}
-  <div class="form-group mb-3">
-    {{ field.label(class="form-label") }}
-    {{ field(class=class + (' is-invalid' if field.errors else '')) }}
+    {% set render_args = {} %}
+    {% if field.render_kw %}{% do render_args.update(field.render_kw) %}{% endif %}
+    {% if type %}{% do render_args.update({'type': type}) %}{% endif %}
+    {% if placeholder %}{% do render_args.update({'placeholder': placeholder}) %}{% endif %}
+
+    {% set css_classes = ['form-control'] %}
+    {% if render_args.class %}{% do css_classes.append(render_args.class) %}{% endif %}
+    {% if field.errors %}{% do css_classes.append('is-invalid') %}{% endif %}
+    {% do render_args.update({'class': css_classes|unique|join(' ')}) %}
+
+    {{ field(**render_args) }}
+
     {% if field.errors %}
-      <div class="invalid-feedback d-block">
-        {{ field.errors[0] }}
-      </div>
+        <div class="invalid-feedback">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
     {% endif %}
-  </div>
+</div>
 {% endmacro %}
 
-{# Macro para renderizar casillas de verificación (checkboxes) #}
-{% macro render_checkbox(field, id='') %}
-  <div class="form-check mt-4">
-    {{ field(class="form-check-input", id=id) }}
-    {{ field.label(class="form-check-label", for=id) }}
-  </div>
+{% macro render_select_field(field, class_=None) %}
+<div class="form-group mb-3">
+    {{ field.label(class="form-label") }}
+
+    {% set render_args = {} %}
+    {% if field.render_kw %}{% do render_args.update(field.render_kw) %}{% endif %}
+    {% set css_classes = ['form-select'] %}
+    {% if render_args.class %}{% do css_classes.append(render_args.class) %}{% endif %}
+    {% if class_ %}{% do css_classes.append(class_) %}{% endif %}
+    {% if field.errors %}{% do css_classes.append('is-invalid') %}{% endif %}
+    {% do render_args.update({'class': css_classes|unique|join(' ')}) %}
+
+    {{ field(**render_args) }}
+
+    {% if field.errors %}
+        <div class="invalid-feedback">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
 {% endmacro %}
 
-{# Macro para renderizar el botón de envío del formulario #}
-{% macro render_submit(field, class='btn btn-primary') %}
-  {{ field(class=class) }}
+{% macro render_queryselect_field(field, class_=None) %}
+<div class="form-group mb-3">
+    {{ field.label(class="form-label") }}
+
+    {% set render_args = {} %}
+    {% if field.render_kw %}{% do render_args.update(field.render_kw) %}{% endif %}
+    {% set css_classes = ['form-select'] %}
+    {% if render_args.class %}{% do css_classes.append(render_args.class) %}{% endif %}
+    {% if class_ %}{% do css_classes.append(class_) %}{% endif %}
+    {% if field.errors %}{% do css_classes.append('is-invalid') %}{% endif %}
+    {% do render_args.update({'class': css_classes|unique|join(' ')}) %}
+
+    {{ field(**render_args) }}
+
+    {% if field.errors %}
+        <div class="invalid-feedback">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_checkbox(field, id=None) %}
+<div class="form-check">
+    {% set render_args = {} %}
+    {% if field.render_kw %}{% do render_args.update(field.render_kw) %}{% endif %}
+    {% if id %}{% do render_args.update({'id': id}) %}{% endif %}
+
+    {% set css_classes = ['form-check-input'] %}
+    {% if render_args.class %}{% do css_classes.append(render_args.class) %}{% endif %}
+    {% if field.errors %}{% do css_classes.append('is-invalid') %}{% endif %}
+    {% do render_args.update({'class': css_classes|unique|join(' ')}) %}
+
+    {{ field(**render_args) }}
+    {{ field.label(class="form-check-label") }}
+    {% if field.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in field.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_submit(field, class_=None) %}
+    {% set render_args = {} %}
+    {% if field.render_kw %}{% do render_args.update(field.render_kw) %}{% endif %}
+    {% set css_classes = ['btn', 'btn-primary'] %}
+    {% if render_args.class %}{% do css_classes.append(render_args.class) %}{% endif %}
+    {% if class_ %}{% do css_classes.append(class_) %}{% endif %}
+    {% do render_args.update({'class': css_classes|unique|join(' ')}) %}
+
+    {{ field(**render_args) }}
 {% endmacro %}

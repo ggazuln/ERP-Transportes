@@ -32,7 +32,11 @@ class Rol(db.Model):
 
     permisos = db.relationship('RolPermiso', back_populates='rol', cascade='all, delete-orphan')
     personas = db.relationship('PersonaRol', back_populates='rol', cascade='all, delete-orphan')
-
+    
+    def __str__(self):
+        return self.nombre
+    
+    
 class RolPermiso(db.Model):
     __tablename__ = 'rol_permiso'
     # Se define una clave primaria compuesta, que es lo estándar para tablas de asociación.
@@ -49,3 +53,4 @@ class PersonaRol(db.Model):
 
     persona = db.relationship('Persona', back_populates='roles')
     rol = db.relationship('Rol', back_populates='personas')
+
